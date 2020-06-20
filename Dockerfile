@@ -6,6 +6,7 @@ WORKDIR /usr/src/app
 
 # copying all the files from your file system to container file system
 COPY package.json .
+COPY package-lock.json .
 
 # install all dependencies
 RUN npm install
@@ -13,8 +14,10 @@ RUN npm install
 # copy oter files as well
 COPY ./ .
 
+RUN npm run build
+
 #expose the port
-EXPOSE 3070
+EXPOSE 8080
 
 # command to run when intantiate an image
 CMD ["npm","start"]
