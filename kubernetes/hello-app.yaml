@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: hello-app
+  name: hello-app
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-app
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: hello-app
+    spec:
+      containers:
+        - image: gcr.io/junicorn/github.com/arangates/whatsapp-web
+          imagePullPolicy: IfNotPresent
+          name: hello-app-sha256-1
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: hello-app
+  name: hello-app-hpa-yap7
+  namespace: default
+spec:
+  maxReplicas: 5
+  metrics:
+    - resource:
+        name: cpu
+        targetAverageUtilization: 80
+      type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hello-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: hello-app
+  name: hello-app-service
+  namespace: default
+spec:
+  clusterIP: 10.40.3.174
+  externalTrafficPolicy: Cluster
+  ports:
+    - nodePort: 31621
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: hello-app
+  sessionAffinity: None
+  type: LoadBalancer
+
