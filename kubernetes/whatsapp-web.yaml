@@ -59,7 +59,7 @@ spec:
     - nodePort: 31621
       port: 80
       protocol: TCP
-      targetPort: 8080
+      targetPort: 80
   selector:
     app: hello-app
   sessionAffinity: None

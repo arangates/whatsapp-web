@@ -1,23 +1,13 @@
-# from base image node
-FROM node:12.16.3
-
-RUN mkdir -p /usr/src/app
+# Stage 1 - the build process
+FROM node:12.16.3 as build-deps
 WORKDIR /usr/src/app
-
-# copying all the files from your file system to container file system
-COPY package.json .
-COPY package-lock.json .
-
-# install all dependencies
+COPY package.json package-lock.json ./
 RUN npm install
-
-# copy oter files as well
-COPY ./ .
-
+COPY . ./
 RUN npm run build
 
-#expose the port
-EXPOSE 8080
-
-# command to run when intantiate an image
-CMD ["npm","start"]
+# Stage 2 - the production environment
+FROM nginx:1.12-alpine
+COPY --from=build-deps /usr/src/app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
